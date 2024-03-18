@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -77,7 +82,7 @@ fun Screen1(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Screen 1")
-        Button(onClick = navigateToScreen2) {
+        DebounceButton(onClick = navigateToScreen2) {
             Text(text = "Navigate to next screen")
         }
     }
@@ -95,10 +100,10 @@ fun Screen2(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Screen 2")
-        Button(onClick = navigateToScreen3) {
+        DebounceButton(onClick = navigateToScreen3) {
             Text(text = "Navigate to next screen")
         }
-        Button(onClick = navigateBack) {
+        DebounceButton(onClick = navigateBack) {
             Text(text = "Navigate back")
         }
     }
@@ -116,11 +121,34 @@ fun Screen3(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Screen 3")
-        Button(onClick = navigateBack) {
+        DebounceButton(onClick = navigateBack) {
             Text(text = "Navigate back")
         }
-        Button(onClick = navigateBackToScreen1) {
+        DebounceButton(onClick = navigateBackToScreen1) {
             Text(text = "Navigate back to screen 1")
         }
+    }
+}
+
+@Composable
+fun DebounceButton(
+    onClick: () -> Unit,
+    debouncePeriod: Long = 300L, // Czas w milisekundach
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    var lastClickTimestamp by remember { mutableLongStateOf(0L) }
+
+    Button(
+        onClick = {
+            val currentTimestamp = System.currentTimeMillis()
+            if (currentTimestamp - lastClickTimestamp >= debouncePeriod) {
+                lastClickTimestamp = currentTimestamp
+                onClick()
+            }
+        },
+        modifier = modifier
+    ) {
+        content()
     }
 }
